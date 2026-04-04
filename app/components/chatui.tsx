@@ -19,12 +19,20 @@ const QUICK_MESSAGES = [
   "How are you? 🧏"
 ];
 
+
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 /* ================= COMPONENT ================= */
 
 export default function ChatUI() {
 
   /* ================= STATE ================= */
-
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [chatStarted,setChatStarted] = useState(false)
   const [input, setInput] = useState("");
@@ -34,10 +42,10 @@ export default function ChatUI() {
   const [mode, setMode] = useState<"thinking" | "creative" | "fast">("fast");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<FeedbackType>(null); 
-
+  const [listening, setListening] = useState<boolean>(false);
 
   /* ================= REFS ================= */
-
+  const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -96,6 +104,89 @@ export default function ChatUI() {
   }, speed);
 };
 
+/*text to speech*/   
+
+const speakText = (text: string) => {
+  window.speechSynthesis.cancel(); // stop previous
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  const voices = window.speechSynthesis.getVoices();
+
+  // 🔥 Try to pick best male voice
+  const selectedVoice =
+    voices.find((v) =>
+      v.name.includes("Google UK English Male")
+    ) ||
+    voices.find((v) =>
+      v.name.includes("Microsoft David")
+    ) ||
+    voices[0];
+
+  speech.voice = selectedVoice;
+  speech.rate = 2;
+  speech.pitch = 0.9;
+
+  window.speechSynthesis.speak(speech);
+};
+
+/*stt*/
+
+useEffect(() => {
+  const SpeechRecognition =
+    (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    console.log("❌ Not supported");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    console.log("🎤 Listening...");
+    setListening(true);
+  };
+
+  recognition.onresult = (event: any) => {
+    console.log("✅ RESULT EVENT FIRED");
+
+    const transcript = event.results[0][0].transcript;  
+
+    console.log("📝 TEXT:", transcript);
+
+    setInput(transcript);
+    setTimeout(() => {
+    handleSend(transcript);
+  }, 300);
+  };
+
+  recognition.onerror = (e: any) => {
+    console.log("❌ ERROR:", e.error);
+  };
+
+  recognition.onend = () => {
+    console.log("🔴 Mic ended");
+    setListening(false);
+  };
+
+  recognitionRef.current = recognition;
+}, []);
+
+const handleMic = () => {
+  if (!recognitionRef.current) return;
+
+  try {
+    recognitionRef.current.start();
+  } catch (e) {
+    console.log("Already running...");
+  }
+};
+
 
    /* ================= copy function ================= */
 
@@ -126,23 +217,67 @@ const handleNewChat = () => {
   setSelectedType(type);
 };
 
+
+/*close sidebar and open*/ 
+
+const CloseIcon = ({ size = 20 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <path
+      d="M15 6L9 12L15 18"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const OpenIcon = ({ size = 20 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <path
+      d="M9 6L15 12L9 18"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+
+
   /* ================= SEND FUNCTION ================= */
 
-  const handleSend = async (presetMessage?: string) => {
+const handleSend = async (presetMessage?: string) => {
   const textToSend = (presetMessage ?? input).trim();
 
-  if (!textToSend || isThinking) return;
+  if (!textToSend) return;
 
+  // ✅ Start chat if first message
   setChatStarted(true);
 
-  const userMessage = { text: textToSend, sender: "user" as const };
+  // ✅ Add user message
+  const userMessage = {
+    text: textToSend,
+    sender: "user" as const,
+  };
 
   setMessages((prev) => [...prev, userMessage]);
   setInput("");
   setIsThinking(true);
 
   try {
-    // ✅ Convert to OpenAI format
+    // ✅ Format last messages (context window)
     const formattedMessages = [
       ...messages.slice(-6).map((msg) => ({
         role: msg.sender === "user" ? "user" : "assistant",
@@ -151,6 +286,7 @@ const handleNewChat = () => {
       { role: "user", content: textToSend },
     ];
 
+    // ✅ API call
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -162,12 +298,16 @@ const handleNewChat = () => {
       }),
     });
 
-    if (!res.ok) throw new Error("Server error");
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
 
     const data = await res.json();
 
-    const reply = data?.reply || "No response from AI.";
-
+    const reply: string =
+      typeof data?.reply === "string" && data.reply.trim()
+        ? data.reply
+        : "No response from AI.";
 
     // ✅ Save bot message
     setMessages((prev) => [
@@ -175,18 +315,25 @@ const handleNewChat = () => {
       { text: reply, sender: "bot" },
     ]);
 
+    // 🔊 ✅ TEXT TO SPEECH (IMPORTANT)
+    window.speechSynthesis.cancel(); // stop previous
+
+    const speech = new SpeechSynthesisUtterance(reply);
+    speech.lang = "en-US";
+    speech.rate = 1;
+    speech.pitch = 1;
+
+    window.speechSynthesis.speak(speech);
+
   } catch (err: any) {
-    console.error("Send Error:", err.message);
+    console.error("Send Error:", err?.message || err);
 
     const errorMsg = "Server error. Please try again.";
-
-
 
     setMessages((prev) => [
       ...prev,
       { text: errorMsg, sender: "bot" },
     ]);
-
   } finally {
     setIsThinking(false);
   }
@@ -197,8 +344,14 @@ const handleNewChat = () => {
 return (
   <div className="app-layout">
 
-    {/* SIDEBAR */}
-    <aside className="sidebar">
+    <button
+  className="toggle-btn"
+  onClick={() => setSidebarOpen(!sidebarOpen)}
+>
+  {sidebarOpen ? <CloseIcon /> : <OpenIcon />}
+</button>
+
+  <aside className={`sidebar ${sidebarOpen ? "" : "closed"}`}>
       <h2 className="logo">KauX</h2>
 
       <button className="new-chat">+ New Chat</button>
@@ -308,6 +461,7 @@ return (
         </div>
       </div>
 
+
     
 
       {/* INPUT (FIXED) */}
@@ -316,7 +470,7 @@ return (
         {/* TITLE (only landing) */}
         {messages.length === 0 && (
           <h1 className="center-title">
-            What brings you here? 🚀
+            Hi <span className="user-gradient">user! </span>how can i help you?
           </h1>
         )}
 
@@ -337,6 +491,24 @@ return (
               }
             }}
           />
+          <div className="input-actions">
+            <button onClick={handleMic} className="mic-btn">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="black"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="1" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0 0 14 0" />
+      <line x1="12" y1="18" x2="12" y2="22" />
+    </svg>
+
+  </button>
 
           <button
             onClick={() => handleSend()}
@@ -346,6 +518,9 @@ return (
             →
           </button>
         </div>
+        </div>
+
+
 
         {/* QUICK BUTTONS (only landing) */}
         {messages.length === 0 && (

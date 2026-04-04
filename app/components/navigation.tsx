@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function Navigation() {
   return (
     <nav style={styles.nav}>
-      <div style={styles.logo}><strong>KauX AI</strong></div>
+      <div style={styles.logo}><strong>✠ KauX AI</strong></div>
       
 
       <div style={styles.links}>

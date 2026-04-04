@@ -15,10 +15,6 @@ export default function ChatHeader() {
        ←
       </button>
       
-      <span className="chat-logo">
-        Beta 1.0 version
-      </span>
-
 
     </div>
   )
