@@ -461,7 +461,10 @@ return (
         </div>
       </div>
 
-
+{/* MOBILE TOP LOGO */}
+<div className="mobile-top-logo">
+  KauX AI
+</div>
     
 
       {/* INPUT (FIXED) */}
@@ -470,7 +473,8 @@ return (
         {/* TITLE (only landing) */}
         {messages.length === 0 && (
           <h1 className="center-title">
-            Hi <span className="user-gradient">user! </span>how can i help you?
+            Hi <span className="user-gradient">user! </span>how can i
+           help you?
           </h1>
         )}
 

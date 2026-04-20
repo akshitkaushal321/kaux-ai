@@ -174,9 +174,10 @@ export default function Home() {
 
       <div className="testimonial-card">
         <p>
-          “Execution mode helped me actually apply concepts instead of just reading.”
+          "I used this app first time and its really impresive it guides 
+          me through my problems and helps me solve them"
         </p>
-        <span>- Priya</span>
+        <span>- Rajesh Kaushal</span>
       </div>
 
       <div className="testimonial-card">

@@ -40,6 +40,8 @@ justify-content:center;
   height: 100vh;
 }
 
+
+
 /* SIDEBAR */
 .sidebar {
   height: 100vh;
@@ -49,8 +51,13 @@ justify-content:center;
   padding: 10px;
   display: flex;
   flex-direction: column;
-  transition: transform 0.5s ease;
+  transition: transform 0.3s ease;
 }
+
+  .sidebar.open {
+    left: 0;
+  }
+
 
 .sidebar.closed {
   transform: translateX(-100%);
@@ -99,7 +106,6 @@ justify-content:center;
 /* MAIN CHAT SIDE */
 .chat-page {
   height: 100vh;
-  overflow: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -163,7 +169,7 @@ background:#ffffff;
 }
 
 .body {
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .chat-inner{
@@ -187,17 +193,29 @@ background:#ffffff;
   margin-bottom:20px;
   text-align:center;
   margin-left: 20px;
+    animation: messageIn 1s ease forwards;
+
 }
+
+@keyframes messageIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 
 /* ================= MESSAGES ================= */
 
-.center-group{
-  margin-bottom: 20px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:20px;
+.center-group {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
+
+
 
 .quick-row {
   margin-top: 16px; /* 👈 input ke neeche space */
@@ -206,6 +224,8 @@ background:#ffffff;
   flex-wrap: wrap;
   justify-content: center;
 }
+
+
 
 .quick-btn {
   padding: 10px 14px;
@@ -501,15 +521,18 @@ background: linear-gradient(90deg, #ff1bc2, #3658ff);
 
 
 .input-bar{
-  width:100%;
+  margin: 0 auto;
+  width:90%;
   max-width:600px;
   display:flex;
   align-items:center;
-  padding:17px;
-  border-radius:50px;
+  padding:10px;
+  border-radius:55px;
   border:1px solid #a3a3a3;
   background:#ffffff;
 }
+
+
 
 .chat-textarea{
   font-family: "poppins";
@@ -537,6 +560,7 @@ background: linear-gradient(90deg, #ff1bc2, #3658ff);
   border:none;
   padding:8px 16px;
   border-radius:999px;
+  border: 1px solid #a3a3a3;
   cursor:pointer;
   font-weight:500;
 }
@@ -547,7 +571,7 @@ background: linear-gradient(90deg, #ff1bc2, #3658ff);
   border-radius: 50%;
 
   background: #fff;
-  border: none;
+  border:1px solid #a3a3a3;
 
   display: flex;
   align-items: center;
@@ -587,6 +611,156 @@ background: linear-gradient(90deg, #ff1bc2, #3658ff);
  20%{opacity:1}
  100%{opacity:.2}
 }
+
+
+/*mobile responsiveness*/
+
+@media (max-width: 768px) {
+
+  /* ================= LAYOUT ================= */
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .chat-page {
+    height: 100dvh !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;  /* 🔥 start from top */
+  align-items: stretch;         /* full width */
+  padding-bottom: 60px;
+  padding-top: 60px;            /* header space */
+}
+
+  .center-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 80px;   /* only for landing spacing */
+  text-align: center;
+}
+
+  /* ================= REMOVE QUICK BUTTONS ================= */
+  .quick-row {
+    display: none !important;
+  }
+
+  /* ================= INPUT FIX (MAIN FIX 🔥) ================= */
+
+.input-container.center {
+    position: fixed;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+
+
+  .input-container,
+  .input-container.bottom,
+  .chat-mode,
+  .input-bar {
+
+    position: fixed !important;
+    bottom: 10px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+
+    width: 95%;
+    max-width: 600px;
+    z-index: 999;
+  }
+
+  /* Remove center mode input */
+  .input-container.center {
+    top: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  /* ================= HEADER ================= */
+  .chatHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 60px;
+    background: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 15px;
+    z-index: 1000;
+
+    border-bottom: 1px solid #eee;
+  }
+
+  .chat-logo {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .backButton {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+
+  /* ================= SIDEBAR FIX ================= */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    width: 75%;
+    height: 100%;
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* ================= TEXT SCALE ================= */
+   .center-title {
+    position: static;   /* 🔥 VERY IMPORTANT */
+    margin-bottom: 400px;
+    text-align: center;
+  }
+
+  /* ================= INPUT SPACING ================= */
+  .input-bar {
+    width: 90%;
+  }
+
+
+  .mobile-top-logo {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    font-family: "poppins";
+    font-size: 25px;
+    font-weight: 800;
+
+    z-index: 1000;
+  }
+
+}
+
 
 
 
@@ -994,6 +1168,240 @@ box-shadow:0 10px 25px rgba(0,0,0,0.1);
 .html {
   scroll-behavior: smooth;
 }
+
+/*mobile responsiveness*/
+
+/* ================= MOBILE RESPONSIVENESS ================= */
+@media (max-width: 768px) {
+
+  /* ===== CONTAINER ===== */
+  .container {
+    padding: 0 16px;
+  }
+
+  /* ===== HERO SECTION ===== */
+.hero {
+    padding-top: 60px;
+    height: auto;
+    gap: 12px;
+  }
+
+  /* ===== MAIN HEADING ===== */
+  .hero h1,
+  .hero-gradient {
+    font-size: 50px;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  /* ===== SUBTEXT ===== */
+  .hero p {
+    font-size: 15px;
+    max-width: 320px;
+    margin: 10px auto 20px;
+    line-height: 1.5;
+    color: #555;
+  }
+
+  /* ===== BUTTONS ===== */
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* 🔥 MAIN BUTTON (LIKE NOTEBOOKLM) */
+  .btn-primary {
+    padding: 10px 20px;   /* smaller */
+    font-size: 14px;
+    border-radius: 20px;
+    width: auto;          /* not full width */
+  }
+
+  /* OPTIONAL SECOND BUTTON */
+  .btn-outline {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 20px;
+    width: auto;
+  }
+
+  /* ===== REMOVE EXTRA SPACE ===== */
+  .hero-banner img {
+    margin: 20px 0 0;
+    width: 100%;
+  }
+
+
+
+  /* ===== INTRO SECTION ===== */
+  .intro-section {
+    padding: 60px 20px;
+    height: auto;
+  }
+
+  .intro-heading,
+  .intro-gradient {
+    font-size: 28px;
+    margin-bottom: 40px;
+  }
+
+  /* ===== INTRO LIST ===== */
+  .intro-list {
+    gap: 40px;
+  }
+
+  .intro-item {
+    grid-template-columns: 1fr; /* 🔥 stack */
+    gap: 20px;
+    text-align: center;
+  }
+
+  .intro-text {
+    max-width: 100%;
+  }
+
+  /* ===== FEATURES GRID ===== */
+  .features-grid {
+    grid-template-columns: 1fr; /* 🔥 1 column */
+    gap: 20px;
+    padding: 0 10px;
+  }
+
+  .feature-card {
+    padding: 20px;
+  }
+
+  /* ===== FEATURES SECTION ===== */
+  .features {
+    height: auto;
+    padding: 60px 20px;
+  }
+
+  .features h2,
+  .features-thin {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  /* ===== TESTIMONIAL SECTION ===== */
+  .testimonial-section {
+    padding: 60px 20px;
+  }
+
+  .testimonial-heading {
+    font-size: 26px;
+    margin-bottom: 30px;
+  }
+
+  .testimonial-card {
+    min-width: 260px;
+    padding: 20px;
+  }
+
+  /* ===== SLIDER FIX ===== */
+  .slider-track {
+    gap: 20px;
+  }
+
+}
+
+/* navbar css*/
+
+/* ================= NAVBAR ================= */
+.nav {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  font-family: "Poppins", sans-serif;
+  position: relative;
+}
+
+/* LOGO */
+.logo {
+  font-size: 25px;
+  font-family: 'poppins';
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  color: #111;
+}
+
+/* LINKS */
+.links {
+  display: flex;
+  gap: 28px;
+}
+
+/* LINK */
+.link {
+  text-decoration: none;
+  color: #000;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.link:hover {
+  opacity: 0.6;
+}
+
+/* ================= MOBILE ================= */
+.menu-btn {
+  margin-bottom: 10px;
+  display: none;
+}
+
+/* MOBILE MENU */
+.mobile-menu {
+  display: none;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+
+  .nav {
+    padding: 0 16px;
+  }
+
+  /* HIDE DESKTOP LINKS */
+  .links {
+    display: none;
+  }
+
+  /* SHOW BUTTON */
+  .menu-btn {
+    display: block;
+    font-size: 22px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* MOBILE DROPDOWN */
+  .mobile-menu {
+    position: absolute;
+    top: 64px;
+    left: 0;
+    width: 100%;
+
+    background: #fff;
+    border-top: 1px solid #eee;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    padding: 20px 0;
+    z-index: 1000;
+  }
+
+}
+
 
 /* About us section */
 
