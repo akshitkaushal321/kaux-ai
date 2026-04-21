@@ -1,6 +1,8 @@
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import NavigationWrapper from "./components/navigationWrapper";
+import { Analytics } from "@vercel/analytics/react";
+
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,7 +26,7 @@ export default function RootLayout({
         <NavigationWrapper />
 
         {children}
-
+        <Analytics />
       </body>
     </html>
   );

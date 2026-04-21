@@ -473,8 +473,7 @@ return (
         {/* TITLE (only landing) */}
         {messages.length === 0 && (
           <h1 className="center-title">
-            Hi <span className="user-gradient">user! </span>how can i
-           help you?
+            Hi <span className="user-gradient">User,</span> I am ready to help you 😊 
           </h1>
         )}
 
@@ -484,9 +483,10 @@ return (
             ref={textareaRef}
             value={input}
             onChange={handleInputChange}
-            placeholder="Ask KauX..."
+            placeholder="Message KauX"
             disabled={isThinking}
             rows={1}
+
             className="chat-textarea"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
