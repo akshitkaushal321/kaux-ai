@@ -2,15 +2,22 @@
 
 import { useState, useRef, useEffect } from "react";
 import ChatHeader from "./chatheader";
+import MessageBubble from "./messagebubble";
+import FileCard from "./FileCard";
+
 
 /* ================= TYPES ================= */
 
 type Message = {
   text: string;
   sender: "user" | "bot";
+  fileUrl?: string;
 };
 
 type FeedbackType = "like" | "dislike" | null;
+type outputMode ="chat" | "pdf" | "ppt";
+
+
 
 const QUICK_MESSAGES = [
   "Who Created you?",
@@ -43,6 +50,11 @@ export default function ChatUI() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<FeedbackType>(null); 
   const [listening, setListening] = useState<boolean>(false);
+  const [prompt, setPrompt] = useState("");
+   const [loading, setLoading] = useState(false);
+   const [outputMode, setOutputMode] = useState<outputMode>("chat");
+
+
 
   /* ================= REFS ================= */
   const recognitionRef = useRef<any>(null);
@@ -54,6 +66,71 @@ export default function ChatUI() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingText]);
+
+
+  /*pdf gen function*/
+
+const sendMessage = async () => {
+  if (!input.trim()) return;
+
+  const userMsg: Message = {
+    sender: "user",
+    text: input,
+  };
+
+  setMessages((prev) => [...prev, userMsg]);
+  setInput("");
+  setLoading(true);
+
+  try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [
+            ...messages.map((m) => ({
+              role: m.sender === "user" ? "user" : "assistant",
+              content: m.text,
+            })),
+            { role: "user", content: input },
+          ],
+        }),
+      });
+ 
+
+    const data = await res.json();
+
+    let fileUrl;
+
+    if (data.pdf) {
+      const byteCharacters = atob(data.pdf);
+      const byteNumbers = Array.from(byteCharacters, (c) =>
+        c.charCodeAt(0)
+      );
+
+      const blob = new Blob([new Uint8Array(byteNumbers)], {
+        type: "application/pdf",
+      });
+
+      fileUrl = URL.createObjectURL(blob);
+    }
+
+    const botMsg: Message = {
+      sender: "bot",
+      text: data.reply,
+      fileUrl,
+    };
+
+    setMessages((prev) => [...prev, botMsg]);
+  } catch (err) {
+    console.error(err);
+  }
+
+  setLoading(false);
+};
+    
 
   /* ================= AUTO GROW TEXTAREA ================= */
 
@@ -260,13 +337,9 @@ const OpenIcon = ({ size = 20 }: { size?: number }) => (
 
 const handleSend = async (presetMessage?: string) => {
   const textToSend = (presetMessage ?? input).trim();
-
   if (!textToSend) return;
 
-  // ✅ Start chat if first message
-  setChatStarted(true);
-
-  // ✅ Add user message
+  // ✅ user message
   const userMessage = {
     text: textToSend,
     sender: "user" as const,
@@ -277,7 +350,7 @@ const handleSend = async (presetMessage?: string) => {
   setIsThinking(true);
 
   try {
-    // ✅ Format last messages (context window)
+    // ✅ FIXED FORMAT (IMPORTANT)
     const formattedMessages = [
       ...messages.slice(-6).map((msg) => ({
         role: msg.sender === "user" ? "user" : "assistant",
@@ -286,7 +359,7 @@ const handleSend = async (presetMessage?: string) => {
       { role: "user", content: textToSend },
     ];
 
-    // ✅ API call
+    // ✅ API CALL
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -304,35 +377,49 @@ const handleSend = async (presetMessage?: string) => {
 
     const data = await res.json();
 
-    const reply: string =
-      typeof data?.reply === "string" && data.reply.trim()
-        ? data.reply
-        : "No response from AI.";
+    let fileUrl: string | undefined = undefined;
 
-    // ✅ Save bot message
-    setMessages((prev) => [
-      ...prev,
-      { text: reply, sender: "bot" },
-    ]);
+    // 🔥 PDF FIX (MAIN PART)
+    if (data.pdf) {
+      try {
+        const byteCharacters = atob(data.pdf);
+        const byteNumbers = Array.from(byteCharacters, (c) =>
+          c.charCodeAt(0)
+        );
 
-    // 🔊 ✅ TEXT TO SPEECH (IMPORTANT)
-    window.speechSynthesis.cancel(); // stop previous
+        const blob = new Blob([new Uint8Array(byteNumbers)], {
+          type: "application/pdf",
+        });
 
-    const speech = new SpeechSynthesisUtterance(reply);
-    speech.lang = "en-US";
-    speech.rate = 1;
-    speech.pitch = 1;
+        fileUrl = URL.createObjectURL(blob);
+      } catch (e) {
+        console.error("PDF decode error:", e);
+      }
+    }
 
-    window.speechSynthesis.speak(speech);
+    // ✅ bot message
+    const botMessage = {
+      text: data.reply || "No response",
+      sender: "bot" as const,
+      fileUrl, // 🔥 THIS IS IMPORTANT
+    };
+
+    setMessages((prev) => [...prev, botMessage]);
+
+    // 🔊 speech (optional - tera already tha)
+    if (data.reply) {
+      window.speechSynthesis.cancel();
+      const speech = new SpeechSynthesisUtterance(data.reply);
+      speech.lang = "en-US";
+      window.speechSynthesis.speak(speech);
+    }
 
   } catch (err: any) {
-    console.error("Send Error:", err?.message || err);
-
-    const errorMsg = "Server error. Please try again.";
+    console.error("Send Error:", err);
 
     setMessages((prev) => [
       ...prev,
-      { text: errorMsg, sender: "bot" },
+      { text: "Server error. Please try again.", sender: "bot" },
     ]);
   } finally {
     setIsThinking(false);
@@ -352,7 +439,7 @@ return (
 </button>
 
   <aside className={`sidebar ${sidebarOpen ? "" : "closed"}`}>
-      <h2 className="logo">KauX</h2>
+      <h2 className="logo">KauX AI</h2>
 
       <button className="new-chat">+ New Chat</button>
 
@@ -398,6 +485,18 @@ return (
                 <span className={`bubble ${m.sender}`}>
                   {m.text}
                 </span>
+
+                {m.fileUrl && (
+  <div className="pdf-download-wrapper">
+    <a
+      href={m.fileUrl}
+      download="kaux-generated.pdf"
+      className="pdf-download-btn"
+    >
+     ⭳ Click to download PDF
+    </a>
+  </div>
+)}
 
                   {/*like and dislike button*/}
 
@@ -465,6 +564,8 @@ return (
 <div className="mobile-top-logo">
   KauX AI
 </div>
+
+
     
 
       {/* INPUT (FIXED) */}
@@ -514,6 +615,8 @@ return (
 
   </button>
 
+  
+
           <button
             onClick={() => handleSend()}
             disabled={isThinking}
@@ -523,7 +626,6 @@ return (
           </button>
         </div>
         </div>
-
 
 
         {/* QUICK BUTTONS (only landing) */}

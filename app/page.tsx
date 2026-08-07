@@ -9,21 +9,19 @@ export default function Home() {
 
     
       <section className="hero">
-        <h1>Understand.<span className="hero-gradient"> Solve. </span> Master</h1>
+        
+        <h1 className="hero-h1">Understand. Solve. Master with <span className="hero-gradient">Aeris</span> </h1>
         <p>
-          Powered for students-get precise, step-by-step answers that simplify even the hardest problems.
+          Aeris is a Fast, intelligent AI built for real work. 
+          Upload files, generate content, and get clear, structured
+          results in seconds. 🚀
         </p>
-
         <div className="hero-buttons">
           <Link href="/try-kaux" className="btn-primary">
-            Try KauX AI →
+            Try KauX <span className="btn-gradient"> Aeris</span>
           </Link>
         </div>
       </section>
-
-
-      {/* INTRO SECTION */}
-
 
 
       <section className="intro-section">

@@ -19,6 +19,10 @@ export default function Navigation() {
         <NavLink href="/testimonials">Testimonials</NavLink>
       </div>
 
+<div className="sep-link">
+  <NavLink href="contact-us">Contact us</NavLink>
+</div>
+
       {/* Mobile Button */}
       <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
         ☰
