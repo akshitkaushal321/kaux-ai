@@ -811,7 +811,7 @@ background: linear-gradient(90deg, #ff1bc2, #3658ff);
 .hero{
 padding:60px 100px;
 font-family: "poppins";
-height:20vh;
+height:vh;
 display:flex;
 flex-direction:column;
 align-items:flex-start;
@@ -1204,94 +1204,98 @@ box-shadow:0 10px 25px rgba(0,0,0,0.1);
 /*mobile responsiveness*/
 
 /* ================= MOBILE RESPONSIVENESS ================= */
-@media (max-width: 768px) {
+/* ================= MOBILE ================= */
 
-  /* ===== CONTAINER ===== */
-  .container {
-    padding: 0 16px;
-  }
+@media (max-width:768px){
 
-  /* ===== HERO SECTION ===== */
-.hero {
-    padding-top: 60px;
-    height: auto;
-    gap: 12px;
-  }
+.container{
+    width:100%;
+    padding:0 16px;
+}
 
-  /* ===== MAIN HEADING ===== */
-  .hero h1,
-  .hero-gradient {
-    font-size: 50px;
-    line-height: 1.3;
-    margin: 0;
-  }
+@media (max-width:768px){
 
-  /* ===== SUBTEXT ===== */
-  .hero p {
-    font-size: 15px;
-    max-width: 320px;
-    margin: 10px auto 20px;
-    line-height: 1.5;
-    color: #555;
-  }
+.hero{
 
-  /* ===== BUTTONS ===== */
-  .hero-buttons {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
+    padding:60px 30px;
+    text-align:left;
+    align-items:flex-start;
+}
 
-  /* 🔥 MAIN BUTTON (LIKE NOTEBOOKLM) */
-  .btn-primary {
-    padding: 10px 20px;   /* smaller */
-    font-size: 14px;
-    border-radius: 20px;
-    width: auto;          /* not full width */
-  }
+.hero-h1{
 
-  /* OPTIONAL SECOND BUTTON */
-  .btn-outline {
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 20px;
-    width: auto;
-  }
+    font-size:40px !important;
+    line-height:1.15;
+    max-width:320px;
+    margin:0;
+}
 
-  /* ===== REMOVE EXTRA SPACE ===== */
-  .hero-banner img {
-    margin: 20px 0 0;
-    width: 100%;
-  }
+.hero p{
 
+    font-size:15px !important;
+    line-height:1.7;
+    max-width:300px;
+    margin-top:16px;
+    margin-bottom:24px;
+}
 
+.hero-buttons{
 
-  /* ===== INTRO SECTION ===== */
-  .intro-section {
-    padding: 60px 20px;
-    height: auto;
-  }
+    display:flex;
+    justify-content:flex-start;
+    align-items:flex-start;
+}
 
-  .intro-heading,
-  .intro-gradient {
-    font-size: 28px;
-    margin-bottom: 40px;
-  }
+.btn-primary{
 
-  /* ===== INTRO LIST ===== */
-  .intro-list {
-    gap: 40px;
-  }
+    font-size:14px;
+    padding:15px 22px;
+}
 
-  .intro-item {
-    grid-template-columns: 1fr; /* 🔥 stack */
-    gap: 20px;
-    text-align: center;
-  }
+}
 
-  .intro-text {
-    max-width: 100%;
-  }
+.hero-banner img{
+
+    width:100%;
+    max-width:320px;
+
+    height:auto;
+}
+
+.intro-section{
+
+    padding:60px 20px;
+}
+
+.intro-heading,
+.intro-gradient{
+
+    font-size:30px;
+}
+
+.intro-list{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:32px;
+}
+
+.intro-item{
+
+    display:flex;
+    flex-direction:column;
+
+    text-align:center;
+
+    gap:20px;
+}
+
+.intro-text{
+
+    max-width:100%;
+}
+
 
   /* ===== FEATURES GRID ===== */
   .features-grid {
